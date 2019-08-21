@@ -1,0 +1,14 @@
+{
+  "player": [
+    {
+      "source": "youtube",
+      "hostname": "localhost",
+      "port": 5001
+    },
+    {
+      "source": "mpd",
+      "hostname": "",
+      "port": 5002
+    }
+  ]
+}
