@@ -3,7 +3,6 @@ package player
 import (
 	"bob/core"
 	"bob/model"
-	"fmt"
 )
 
 type Player struct {
@@ -22,13 +21,15 @@ func NewPlayer(queue *Queue, env *core.Environment, bobForwarder *BobForwarder) 
 	}
 }
 
+func (p *Player) Search(query string) *model.SearchResponse {
+	return p.bobForwarder.ForwardSearch(query)
+}
+
 func (p *Player) SetPlayback(playback model.Playback) error {
 	p.Queue.Clear()
 	p.Queue.PrependPlayback(playback)
 
 	err := p.bobForwarder.ForwardSetPlayback(playback)
-
-	fmt.Println(p.Queue.Playbacks)
 
 	return err
 }

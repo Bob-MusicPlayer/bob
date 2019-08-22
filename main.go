@@ -29,7 +29,7 @@ func main() {
 
 	p := player.NewPlayer(queue, environment, bobForwarder)
 
-	worker := util.NewWorker(hub, p)
+	worker := util.NewWorker(hub, p, environment)
 	bobHandler := handler.NewBobHandler(hub, worker)
 
 	http.HandleFunc("/api/v1/connect", bobHandler.HandleConnect)

@@ -3,12 +3,14 @@
     {
       "source": "youtube",
       "hostname": "localhost",
-      "port": 5001
+      "port": 5001,
+      "iconUrl": "https://ionicons.com/ionicons/svg/logo-youtube.svg"
     },
     {
       "source": "mpd",
-      "hostname": "",
-      "port": 5002
+      "hostname": "localhost",
+      "port": 5000,
+      "iconUrl": "https://ionicons.com/ionicons/svg/md-cloud.svg"
     }
   ]
 }

@@ -8,4 +8,5 @@ type Playback struct {
 	Duration      float64 `json:"duration"`
 	CachePosition float64 `json:"cachePosition"`
 	Source        string  `json:"source"`
+	ThumbnailUrl  string  `json:"thumbnailUrl"`
 }
