@@ -24,10 +24,12 @@ func (bf *BobForwarder) buildUrl(player *model.Player, action string) string {
 	return fmt.Sprintf("http://%s:%d/api/v1/%s", player.Hostname, player.Port, action)
 }
 
+func (bf *BobForwarder) getPlayer() []*model.Player {
+	return bf.env.ConfigManager.Config.Player
+}
+
 func (bf *BobForwarder) ForwardSetPlayback(playback model.Playback) error {
 	player := bf.env.ConfigManager.GetPlayerBySource(playback.Source)
-
-	fmt.Println(bf.buildUrl(player, "playback"))
 
 	data, err := json.Marshal(playback)
 	if err != nil {
@@ -40,7 +42,7 @@ func (bf *BobForwarder) ForwardSetPlayback(playback model.Playback) error {
 }
 
 func (bf *BobForwarder) ForwardSearch(query string) *model.SearchResponse {
-	players := bf.env.ConfigManager.Config.Player
+	players := bf.getPlayer()
 
 	response := model.SearchResponse{}
 
@@ -88,4 +90,43 @@ func (bf *BobForwarder) ForwardSearch(query string) *model.SearchResponse {
 		}
 	}
 	return &response
+}
+
+func (bf *BobForwarder) ForwardPlay(source string) error {
+	player := bf.env.ConfigManager.GetPlayerBySource(source)
+
+	_, err := http.Post(bf.buildUrl(player, "play"), "application/json", nil)
+
+	return err
+}
+
+func (bf *BobForwarder) ForwardPause(source string) error {
+	player := bf.env.ConfigManager.GetPlayerBySource(source)
+
+	_, err := http.Post(bf.buildUrl(player, "pause"), "application/json", nil)
+
+	return err
+}
+
+func (bf *BobForwarder) ForwardGetPlaybackInfo(source string) (*model.Playback, error) {
+	player := bf.env.ConfigManager.GetPlayerBySource(source)
+
+	resp, err := http.Get(bf.buildUrl(player, "playback/info"))
+	if err != nil {
+		return nil, err
+	}
+
+	raw, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var playback model.Playback
+
+	err = json.Unmarshal(raw, &playback)
+	if err != nil {
+		return nil, err
+	}
+
+	return &playback, err
 }

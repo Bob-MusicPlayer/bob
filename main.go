@@ -2,13 +2,13 @@ package main
 
 import (
 	"bob/core"
+	"bob/handler"
 	"bob/player"
 	"fmt"
 	"github.com/alexandrevicenzi/go-sse"
 	"log"
 	"net/http"
 	"os"
-	"time"
 )
 
 func main() {
@@ -40,18 +40,16 @@ func main() {
 
 	queue := player.NewQueue()
 
-	player.NewPlayer(queue, environment, bobForwarder)
+	p := player.NewPlayer(queue, environment, bobForwarder)
 
-	go func() {
-		for {
-			time.Sleep(time.Second)
-			s.SendMessage("/api/v1/events", sse.SimpleMessage("test"))
-		}
-	}()
-
-	//bobHandler := handler.NewBobHandler(s)
+	bobHandler := handler.NewBobHandler(p, s)
 
 	http.Handle("/api/v1/events", s)
+
+	http.HandleFunc("/api/v1/play", bobHandler.HandlePlay)
+	http.HandleFunc("/api/v1/pause", bobHandler.HandlePause)
+	http.HandleFunc("/api/v1/playback", bobHandler.HandlePlayback)
+	http.HandleFunc("/api/v1/search", bobHandler.HandleSearch)
 
 	fmt.Println(http.ListenAndServe(":5002", nil))
 }

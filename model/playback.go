@@ -9,4 +9,5 @@ type Playback struct {
 	CachePosition float64 `json:"cachePosition"`
 	Source        string  `json:"source"`
 	ThumbnailUrl  string  `json:"thumbnailUrl"`
+	IsPlaying     bool    `json:"isPlaying"`
 }
