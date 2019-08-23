@@ -2,18 +2,31 @@ package main
 
 import (
 	"bob/core"
-	"bob/handler"
 	"bob/player"
-	"bob/util"
 	"fmt"
+	"github.com/alexandrevicenzi/go-sse"
+	"log"
 	"net/http"
+	"os"
+	"time"
 )
 
 func main() {
 	environment := &core.Environment{}
 
-	hub := util.NewHub()
-	go hub.Run()
+	s := sse.NewServer(&sse.Options{
+		RetryInterval: 10 * 1000,
+		Headers: map[string]string{
+			"Access-Control-Allow-Origin":  "*",
+			"Access-Control-Allow-Methods": "GET, OPTIONS",
+			"Access-Control-Allow-Headers": "Keep-Alive,X-Requested-With,Cache-Control,Content-Type,Last-Event-ID",
+		},
+		ChannelNameFunc: func(request *http.Request) string {
+			return request.URL.Path
+		},
+		Logger: log.New(os.Stdout, "go-sse: ", log.Ldate|log.Ltime|log.Lshortfile),
+	})
+	defer s.Shutdown()
 
 	configManager := core.NewConfigManager(environment)
 	err := configManager.ReadConfig()
@@ -27,12 +40,18 @@ func main() {
 
 	queue := player.NewQueue()
 
-	p := player.NewPlayer(queue, environment, bobForwarder)
+	player.NewPlayer(queue, environment, bobForwarder)
 
-	worker := util.NewWorker(hub, p, environment)
-	bobHandler := handler.NewBobHandler(hub, worker)
+	go func() {
+		for {
+			time.Sleep(time.Second)
+			s.SendMessage("/api/v1/events", sse.SimpleMessage("test"))
+		}
+	}()
 
-	http.HandleFunc("/api/v1/connect", bobHandler.HandleConnect)
+	//bobHandler := handler.NewBobHandler(s)
+
+	http.Handle("/api/v1/events", s)
 
 	fmt.Println(http.ListenAndServe(":5002", nil))
 }
