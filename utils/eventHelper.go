@@ -3,7 +3,6 @@ package utils
 import (
 	"bob/model"
 	"encoding/json"
-	"fmt"
 	"github.com/alexandrevicenzi/go-sse"
 )
 
@@ -18,8 +17,6 @@ func SendEvent(eventBroker *sse.Server, event string, payload interface{}) error
 	if err != nil {
 		return err
 	}
-
-	fmt.Println(string(data))
 
 	eventBroker.SendMessage("/api/v1/events", sse.SimpleMessage(string(data)))
 

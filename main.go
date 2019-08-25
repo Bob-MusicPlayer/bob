@@ -6,9 +6,7 @@ import (
 	"bob/player"
 	"fmt"
 	"github.com/alexandrevicenzi/go-sse"
-	"log"
 	"net/http"
-	"os"
 )
 
 func main() {
@@ -24,7 +22,7 @@ func main() {
 		ChannelNameFunc: func(request *http.Request) string {
 			return request.URL.Path
 		},
-		Logger: log.New(os.Stdout, "go-sse: ", log.Ldate|log.Ltime|log.Lshortfile),
+		Logger: nil,
 	})
 	defer s.Shutdown()
 
