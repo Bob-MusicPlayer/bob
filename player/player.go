@@ -62,10 +62,23 @@ func (p *Player) Sync() error {
 		return err
 	}
 
-	fmt.Println(playback.IsPlaying)
-
 	p.IsPlaying = playback.IsPlaying
 
 	p.CurrentPlayback = playback
+	return nil
+}
+
+func (p *Player) SeekTo(source string, seconds int) error {
+	if p.CurrentPlayback == nil {
+		return nil
+	}
+
+	fmt.Println(seconds)
+
+	err := p.bobForwarder.ForwardSeek(source, seconds)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

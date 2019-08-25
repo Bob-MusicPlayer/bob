@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 )
 
 type BobForwarder struct {
@@ -46,8 +47,10 @@ func (bf *BobForwarder) ForwardSearch(query string) *model.SearchResponse {
 
 	response := model.SearchResponse{}
 
+	fmt.Println(url.QueryEscape(query))
+
 	for _, player := range players {
-		resp, err := http.Get(bf.buildUrl(player, fmt.Sprintf("search?q=%s", query)))
+		resp, err := http.Get(bf.buildUrl(player, fmt.Sprintf("search?q=%s", url.QueryEscape(query))))
 		if err != nil {
 			response[player.Source] = model.PlayerSearchResponse{
 				Amount:    0,
@@ -129,4 +132,14 @@ func (bf *BobForwarder) ForwardGetPlaybackInfo(source string) (*model.Playback, 
 	}
 
 	return &playback, err
+}
+
+func (bf *BobForwarder) ForwardSeek(source string, seconds int) error {
+	player := bf.env.ConfigManager.GetPlayerBySource(source)
+
+	fmt.Println(bf.buildUrl(player, fmt.Sprintf("playback/seek?seconds=%d", seconds)))
+
+	_, err := http.Post(bf.buildUrl(player, fmt.Sprintf("playback/seek?seconds=%d", seconds)), "application/json", nil)
+
+	return err
 }

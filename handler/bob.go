@@ -8,6 +8,7 @@ import (
 	"github.com/alexandrevicenzi/go-sse"
 	"net/http"
 	shared "shared-bob"
+	"strconv"
 	"time"
 )
 
@@ -17,7 +18,6 @@ type BobHandler struct {
 }
 
 func NewBobHandler(player *player.Player, eventBroker *sse.Server) *BobHandler {
-
 	go func() {
 		for {
 			time.Sleep(time.Millisecond * 500)
@@ -88,12 +88,14 @@ func (bh *BobHandler) HandlePlayback(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	playback := model.Playback{
-		ID:     "DKnIpsHe_YM",
-		Source: "youtube",
+	var playback model.Playback
+
+	err := responseHelper.DecodeBody(&playback)
+	if responseHelper.ReturnHasError(err) {
+		return
 	}
 
-	err := bh.player.SetPlayback(playback)
+	err = bh.player.SetPlayback(playback)
 	if responseHelper.ReturnHasError(err) {
 		return
 	}
@@ -128,4 +130,31 @@ func (bh *BobHandler) HandleSearch(w http.ResponseWriter, req *http.Request) {
 	}
 
 	responseHelper.ReturnOk(searchResponse)
+}
+
+func (bh *BobHandler) HandlePlaybackSeek(w http.ResponseWriter, req *http.Request) {
+	responseHelper := shared.NewResponseHelper(w, req)
+
+	if responseHelper.ReturnOptionsOrNotAllowed(http.MethodPost) {
+		return
+	}
+
+	seconds := req.URL.Query().Get("seconds")
+
+	sec, err := strconv.Atoi(seconds)
+	if responseHelper.ReturnHasError(err) {
+		return
+	}
+
+	err = bh.player.SeekTo(bh.player.CurrentPlayback.Source, sec)
+	if responseHelper.ReturnHasError(err) {
+		return
+	}
+
+	err = utils.SendEvent(bh.eventBroker, "seek", sec)
+	if responseHelper.ReturnHasError(err) {
+		return
+	}
+
+	responseHelper.ReturnOk(nil)
 }

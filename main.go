@@ -47,6 +47,7 @@ func main() {
 	http.HandleFunc("/api/v1/play", bobHandler.HandlePlay)
 	http.HandleFunc("/api/v1/pause", bobHandler.HandlePause)
 	http.HandleFunc("/api/v1/playback", bobHandler.HandlePlayback)
+	http.HandleFunc("/api/v1/playback/seek", bobHandler.HandlePlaybackSeek)
 	http.HandleFunc("/api/v1/search", bobHandler.HandleSearch)
 
 	fmt.Println(http.ListenAndServe(":5002", nil))
