@@ -20,7 +20,7 @@ type BobHandler struct {
 func NewBobHandler(player *player.Player, eventBroker *sse.Server) *BobHandler {
 	go func() {
 		for {
-			time.Sleep(time.Millisecond * 500)
+			time.Sleep(time.Second * 5)
 			err := player.Sync()
 			if err != nil {
 				fmt.Println(fmt.Sprintf("Sync failed with error: %s", err.Error()))
