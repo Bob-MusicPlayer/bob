@@ -6,6 +6,7 @@ import (
 	"bob/player"
 	"fmt"
 	"github.com/alexandrevicenzi/go-sse"
+	"net"
 	"net/http"
 )
 
@@ -49,6 +50,11 @@ func main() {
 	http.HandleFunc("/api/v1/playback", bobHandler.HandlePlayback)
 	http.HandleFunc("/api/v1/playback/seek", bobHandler.HandlePlaybackSeek)
 	http.HandleFunc("/api/v1/search", bobHandler.HandleSearch)
+	http.HandleFunc("/api/v1/sync", bobHandler.HandleSync)
 
-	fmt.Println(http.ListenAndServe(":5002", nil))
+	l, err := net.Listen("tcp4", "192.168.11.241:5002")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(http.Serve(l, nil))
 }

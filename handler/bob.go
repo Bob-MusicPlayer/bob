@@ -14,31 +14,45 @@ import (
 
 type BobHandler struct {
 	player      *player.Player
+	syncEnabled bool
 	eventBroker *sse.Server
 }
 
 func NewBobHandler(player *player.Player, eventBroker *sse.Server) *BobHandler {
+	handler := &BobHandler{
+		player:      player,
+		eventBroker: eventBroker,
+		syncEnabled: false,
+	}
+
+	handler.SendSyncs()
+
+	return handler
+}
+
+func (bh *BobHandler) SendSyncs() {
 	go func() {
 		for {
 			time.Sleep(time.Second * 5)
-			err := player.Sync()
-			if err != nil {
-				fmt.Println(fmt.Sprintf("Sync failed with error: %s", err.Error()))
+			if bh.syncEnabled {
+				bh.sync()
 			}
-
-			sync := model.Sync{
-				IsPlaying: player.IsPlaying,
-				Playback:  player.CurrentPlayback,
-			}
-
-			_ = utils.SendEvent(eventBroker, "sync", sync)
 		}
 	}()
+}
 
-	return &BobHandler{
-		player:      player,
-		eventBroker: eventBroker,
+func (bh *BobHandler) sync() {
+	err := bh.player.Sync()
+	if err != nil {
+		fmt.Println(fmt.Sprintf("Sync failed with error: %s", err.Error()))
 	}
+
+	sync := model.Sync{
+		IsPlaying: bh.player.IsPlaying,
+		Playback:  bh.player.CurrentPlayback,
+	}
+
+	_ = utils.SendEvent(bh.eventBroker, "sync", sync)
 }
 
 func (bh *BobHandler) HandlePlay(w http.ResponseWriter, req *http.Request) {
@@ -52,6 +66,8 @@ func (bh *BobHandler) HandlePlay(w http.ResponseWriter, req *http.Request) {
 	if responseHelper.ReturnHasError(err) {
 		return
 	}
+
+	bh.syncEnabled = true
 
 	err = utils.SendEvent(bh.eventBroker, "play", nil)
 	if responseHelper.ReturnHasError(err) {
@@ -73,6 +89,8 @@ func (bh *BobHandler) HandlePause(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	bh.syncEnabled = false
+
 	err = utils.SendEvent(bh.eventBroker, "pause", nil)
 	if responseHelper.ReturnHasError(err) {
 		return
@@ -88,6 +106,8 @@ func (bh *BobHandler) HandlePlayback(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	bh.syncEnabled = false
+
 	var playback model.Playback
 
 	err := responseHelper.DecodeBody(&playback)
@@ -99,6 +119,8 @@ func (bh *BobHandler) HandlePlayback(w http.ResponseWriter, req *http.Request) {
 	if responseHelper.ReturnHasError(err) {
 		return
 	}
+
+	bh.syncEnabled = true
 
 	err = utils.SendEvent(bh.eventBroker, "play", nil)
 	if responseHelper.ReturnHasError(err) {
@@ -114,6 +136,8 @@ func (bh *BobHandler) HandleSearch(w http.ResponseWriter, req *http.Request) {
 	if responseHelper.ReturnOptionsOrNotAllowed(http.MethodPost) {
 		return
 	}
+
+	fmt.Println("test")
 
 	var searchRequest model.SearchRequest
 
@@ -155,6 +179,17 @@ func (bh *BobHandler) HandlePlaybackSeek(w http.ResponseWriter, req *http.Reques
 	if responseHelper.ReturnHasError(err) {
 		return
 	}
+
+	responseHelper.ReturnOk(nil)
+}
+
+func (bh *BobHandler) HandleSync(w http.ResponseWriter, req *http.Request) {
+	responseHelper := shared.NewResponseHelper(w, req)
+	if responseHelper.ReturnOptionsOrNotAllowed(http.MethodPost) {
+		return
+	}
+
+	bh.sync()
 
 	responseHelper.ReturnOk(nil)
 }
