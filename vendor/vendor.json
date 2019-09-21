@@ -1,0 +1,65 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "Mbrl/Jwri/nFD37+gIA5We0WTNI=",
+			"path": "github.com/alexandrevicenzi/go-sse",
+			"revision": "805eefa457e783773dabbdfbc35118967fd67a45",
+			"revisionTime": "2019-05-31T22:42:09Z"
+		},
+		{
+			"checksumSHA1": "Dm73A5CCfi9v/bNb0tTlju8wEys=",
+			"path": "github.com/go-pg/pg",
+			"revision": "71f9687e0ec6d8b9cafcd0c2b020ab4431117e24",
+			"revisionTime": "2019-09-17T10:00:26Z"
+		},
+		{
+			"checksumSHA1": "rw3J5/runUEevKnqOJuhdtDYGms=",
+			"path": "github.com/go-pg/pg/orm",
+			"revision": "71f9687e0ec6d8b9cafcd0c2b020ab4431117e24",
+			"revisionTime": "2019-09-17T10:00:26Z"
+		},
+		{
+			"checksumSHA1": "iqeSAF7imnVsW+iqLqf6kkYn1VU=",
+			"path": "github.com/jinzhu/inflection",
+			"revision": "f5c5f50e6090ae76a29240b61ae2a90dd810112e",
+			"revisionTime": "2019-06-03T04:28:36Z"
+		},
+		{
+			"checksumSHA1": "Hk0Joei7Y1gTiW08KkFbI694Oc8=",
+			"path": "github.com/vmihailenco/tagparser",
+			"revision": "dca2180cb9545db13d849570f581ad3e01f5bc48",
+			"revisionTime": "2019-08-22T10:29:54Z"
+		},
+		{
+			"checksumSHA1": "Bmx0Rq+7GNJYDuWRqS98tNsctn4=",
+			"path": "github.com/vmihailenco/tagparser/internal",
+			"revision": "dca2180cb9545db13d849570f581ad3e01f5bc48",
+			"revisionTime": "2019-08-22T10:29:54Z"
+		},
+		{
+			"checksumSHA1": "v9HukKZ6tx5aW+syUQS/X+gHY3A=",
+			"path": "github.com/vmihailenco/tagparser/internal/parser",
+			"revision": "dca2180cb9545db13d849570f581ad3e01f5bc48",
+			"revisionTime": "2019-08-22T10:29:54Z"
+		},
+		{
+			"checksumSHA1": "1MGpGDQqnUoRpv7VEcQrXOBydXE=",
+			"path": "golang.org/x/crypto/pbkdf2",
+			"revision": "227b76d455e791cb042b03e633e2f7fbcfdf74a5",
+			"revisionTime": "2019-09-11T02:06:19Z"
+		},
+		{
+			"checksumSHA1": "3d7mxBDmd5LIAyMUYe5teXGXWTM=",
+			"path": "mellium.im/sasl",
+			"revision": "e27ea4901008898ec096743695a52411c2d03886",
+			"revisionTime": "2019-08-15T21:08:34Z"
+		},
+		{
+			"path": "shared-bob",
+			"revision": ""
+		}
+	],
+	"rootPath": "bob"
+}

@@ -4,10 +4,8 @@ import (
 	"bob/core"
 	"bob/handler"
 	"bob/player"
-	"bob/utils"
 	"fmt"
 	"github.com/alexandrevicenzi/go-sse"
-	"github.com/go-pg/pg"
 	"net"
 	"net/http"
 )
@@ -43,18 +41,6 @@ func main() {
 
 	p := player.NewPlayer(queue, environment, bobForwarder)
 
-	playerDatabase := pg.Connect(&pg.Options{
-		User:     "postgres",
-		Password: "postgres",
-		Database: "bob",
-	})
-
-	fmt.Println("Initialize Database if necessary")
-	err = utils.InitializePlayerTables(playerDatabase)
-	if err != nil {
-		fmt.Println(err)
-	}
-
 	//playerRepository := repository.NewPlayerRepository(playerDatabase)
 
 	bobHandler := handler.NewBobHandler(p, s)
@@ -68,7 +54,7 @@ func main() {
 	http.HandleFunc("/api/v1/search", bobHandler.HandleSearch)
 	http.HandleFunc("/api/v1/sync", bobHandler.HandleSync)
 
-	l, err := net.Listen("tcp4", "localhost:5002")
+	l, err := net.Listen("tcp4", "192.168.11.241:5002")
 	if err != nil {
 		panic(err)
 	}
