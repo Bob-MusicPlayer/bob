@@ -1,6 +1,8 @@
 package model
 
 type Sync struct {
-	IsPlaying bool      `json:"isPlaying"`
-	Playback  *Playback `json:"playback"`
+	PlayerState       string    `json:"playerState"`
+	NextAvailable     bool      `json:"nextAvailable"`
+	PreviousAvailable bool      `json:"previousAvailable"`
+	Playback          *Playback `json:"playback"`
 }

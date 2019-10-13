@@ -3,23 +3,87 @@ package player
 import (
 	"bob/core"
 	"bob/model"
+	"errors"
 	"fmt"
+	"github.com/sirupsen/logrus"
+	"time"
+)
+
+const (
+	PLAYER_STATE_PLAYING     = "PLAYING"
+	PLAYER_STATE_LOADING     = "LOADING"
+	PLAYER_STATE_PAUSED      = "PAUSED"
+	PLAYER_STATE_NO_PLAYBACK = "NOPLAYBACK"
+)
+
+var (
+	NO_NEXT_PLAYBACK = errors.New("no next playback in queue available")
 )
 
 type Player struct {
 	CurrentPlayback *model.Playback
 	IsPlaying       bool
 	Queue           *Queue
+	loading         bool
 	env             *core.Environment
 	bobForwarder    *BobForwarder
 }
 
 func NewPlayer(queue *Queue, env *core.Environment, bobForwarder *BobForwarder) *Player {
-	return &Player{
+	player := &Player{
 		Queue:        queue,
 		env:          env,
 		bobForwarder: bobForwarder,
 	}
+
+	player.PlayerLoop()
+
+	return player
+}
+
+func (p *Player) PlayerLoop() {
+	go func() {
+		oldPosition := 0.0
+		oldPosEqPosTimes := 0
+
+		for {
+			if p.CurrentPlayback != nil {
+				oldPosition = p.CurrentPlayback.Position
+			}
+			p.Sync()
+			if p.CurrentPlayback != nil && p.CurrentPlayback.Position >= 0 && p.CurrentPlayback.Position == oldPosition {
+				oldPosEqPosTimes++
+			} else {
+				oldPosEqPosTimes = 0
+			}
+			if p.CurrentPlayback != nil && p.Queue.Size() == 0 && p.CurrentPlayback.Duration > 0 && oldPosEqPosTimes > 4 {
+				logrus.Info("Current Playback finished. Stop player.")
+				p.CurrentPlayback = nil
+				oldPosEqPosTimes = 0
+			} else if p.CurrentPlayback != nil && p.Queue.Size() > 0 && p.CurrentPlayback.Duration > 0 && oldPosEqPosTimes > 4 {
+				logrus.Info("Current Playback finished. Set next playback.")
+				p.Next()
+				oldPosEqPosTimes = 0
+			}
+			time.Sleep(time.Millisecond * 200)
+		}
+	}()
+}
+
+func (p *Player) GetState() string {
+	if p.loading {
+		return PLAYER_STATE_LOADING
+	}
+	if p.CurrentPlayback == nil {
+		return PLAYER_STATE_NO_PLAYBACK
+	}
+	if p.IsPlaying {
+		return PLAYER_STATE_PLAYING
+	} else if p.Queue.Size() == 0 {
+		p.CurrentPlayback = nil
+		return PLAYER_STATE_NO_PLAYBACK
+	}
+	return PLAYER_STATE_NO_PLAYBACK
 }
 
 func (p *Player) Search(search *model.SearchRequest) *model.SearchResponse {
@@ -27,12 +91,13 @@ func (p *Player) Search(search *model.SearchRequest) *model.SearchResponse {
 }
 
 func (p *Player) SetPlayback(playback model.Playback) error {
-	p.Queue.Clear()
-	p.Queue.PrependPlayback(playback)
+	p.loading = true
+
+	err := p.bobForwarder.ForwardSetPlayback(playback)
 
 	p.CurrentPlayback = &playback
 
-	err := p.bobForwarder.ForwardSetPlayback(playback)
+	p.loading = false
 
 	return err
 }
@@ -51,6 +116,40 @@ func (p *Player) Pause() error {
 	}
 	err := p.bobForwarder.ForwardPause(p.CurrentPlayback.Source)
 	return err
+}
+
+func (p *Player) Next() error {
+	if p.Queue.Size() == 0 {
+		return NO_NEXT_PLAYBACK
+	}
+
+	p.Queue.AddPrevious(*p.CurrentPlayback)
+
+	err := p.SetPlayback(p.Queue.Playbacks[0])
+	if err != nil {
+		return err
+	}
+
+	p.Queue.RemoveFirst()
+
+	return nil
+}
+
+func (p *Player) Previous() error {
+	if p.Queue.SizePrevious() == 0 {
+		return NO_NEXT_PLAYBACK
+	}
+
+	p.Queue.PrependPlayback(*p.CurrentPlayback)
+
+	err := p.SetPlayback(p.Queue.PreviousPlaybacks[0])
+	if err != nil {
+		return err
+	}
+
+	p.Queue.RemoveFirstFromPrevious()
+
+	return nil
 }
 
 func (p *Player) Sync() error {
