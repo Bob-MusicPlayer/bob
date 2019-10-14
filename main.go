@@ -15,9 +15,20 @@ import (
 func main() {
 	environment := &core.Environment{}
 
-	logrus.SetOutput(os.Stdout)
-	logrus.SetLevel(logrus.DebugLevel)
+	printBanner()
 
+	configManager := core.NewConfigManager(environment)
+	err := configManager.ReadConfig()
+	if err != nil {
+		logrus.Panic(err)
+	}
+
+	environment.ConfigManager = configManager
+
+	initializeLogger(configManager.Config.LogLevel)
+
+	logrus.Info("Start bob")
+	logrus.Info("Start Server Send Event Server")
 	s := sse.NewServer(&sse.Options{
 		RetryInterval: 10 * 1000,
 		Headers: map[string]string{
@@ -32,19 +43,11 @@ func main() {
 	})
 	defer s.Shutdown()
 
-	configManager := core.NewConfigManager(environment)
-	err := configManager.ReadConfig()
-	if err != nil {
-		panic(err)
-	}
-
-	environment.ConfigManager = configManager
-
 	bobForwarder := player.NewBoxForwarder(environment)
 
 	queue := player.NewQueue()
 
-	p := player.NewPlayer(queue, environment, bobForwarder)
+	p := player.NewPlayer(queue, environment, bobForwarder, s)
 
 	//playerRepository := repository.NewPlayerRepository(playerDatabase)
 
@@ -62,9 +65,40 @@ func main() {
 	http.HandleFunc("/api/v1/search", bobHandler.HandleSearch)
 	http.HandleFunc("/api/v1/sync", bobHandler.HandleSync)
 
-	l, err := net.Listen("tcp4", "localhost:5002")
+	l, err := net.Listen("tcp4", fmt.Sprintf("%s:%d", configManager.Config.Hostname, configManager.Config.Port))
 	if err != nil {
 		panic(err)
 	}
+	logrus.WithFields(logrus.Fields{
+		"hostname": configManager.Config.Hostname,
+		"port":     configManager.Config.Port,
+	}).Info("Start Webserver")
 	fmt.Println(http.Serve(l, nil))
+}
+
+func printBanner() {
+	fmt.Println("+-------------------------------+")
+	fmt.Println("|                               |")
+	fmt.Println("|   ██████\033[1;34m╗\033[0m  ██████\033[1;34m╗\033[0m ██████\033[1;34m╗\033[0m    |")
+	fmt.Println("|   ██\033[1;34m╔══\033[0m██\033[1;34m╗\033[0m██\033[1;34m╔═══\033[0m██\033[1;34m╗\033[0m██\033[1;34m╔══\033[0m██\033[1;34m╗\033[0m   |")
+	fmt.Println("|   ██████\033[1;34m╔╝\033[0m██\033[1;34m║\033[0m   ██\033[1;34m║\033[0m██████\033[1;34m╔╝\033[0m   |")
+	fmt.Println("|   ██\033[1;34m╔══\033[0m██\033[1;34m╗\033[0m██\033[1;34m║\033[0m   ██\033[1;34m║\033[0m██\033[1;34m╔══\033[0m██\033[1;34m╗\033[0m   |")
+	fmt.Println("|   ██████\033[1;34m╔╝╚\033[0m██████\033[1;34m╔╝\033[0m██████\033[1;34m╔╝\033[0m   |")
+	fmt.Println("|   \033[1;34m╚═════╝  ╚═════╝ ╚═════╝\033[0m    |")
+	fmt.Println("|                               |")
+	fmt.Println("+-------------------------------+")
+}
+
+func initializeLogger(level string) {
+	lev, err := logrus.ParseLevel(level)
+	if err != nil {
+		logrus.Panic(err)
+		return
+	}
+	logrus.SetLevel(lev)
+	logrus.SetOutput(os.Stdout)
+	logrus.SetFormatter(&logrus.TextFormatter{
+		ForceColors:   true,
+		DisableColors: false,
+	})
 }

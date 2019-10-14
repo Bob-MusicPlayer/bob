@@ -4,8 +4,8 @@ import (
 	"bob/model"
 	"bob/player"
 	"bob/utils"
-	"fmt"
 	"github.com/alexandrevicenzi/go-sse"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	shared "shared-bob"
 	"strconv"
@@ -34,7 +34,7 @@ func (bh *BobHandler) SendSyncs() {
 	go func() {
 		for {
 			time.Sleep(time.Second * 5)
-			if bh.syncEnabled {
+			if bh.syncEnabled && bh.player.GetState() != player.PLAYER_STATE_NO_PLAYBACK {
 				bh.sync()
 			}
 		}
@@ -44,7 +44,7 @@ func (bh *BobHandler) SendSyncs() {
 func (bh *BobHandler) sync() {
 	err := bh.player.Sync()
 	if err != nil {
-		fmt.Println(fmt.Sprintf("Sync failed with error: %s", err.Error()))
+		logrus.WithError(err).Error("Sync failed with error: %s")
 	}
 
 	sync := model.Sync{
@@ -53,6 +53,8 @@ func (bh *BobHandler) sync() {
 		NextAvailable:     bh.player.Queue.NextAvailable(),
 		PreviousAvailable: bh.player.Queue.PreviousAvailable(),
 	}
+
+	logrus.WithField("sync", sync).Debug("Send sync")
 
 	_ = utils.SendEvent(bh.eventBroker, "sync", sync)
 }
@@ -198,8 +200,6 @@ func (bh *BobHandler) HandleSearch(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	fmt.Println("test")
-
 	var searchRequest model.SearchRequest
 
 	err := responseHelper.DecodeBody(&searchRequest)
@@ -208,11 +208,6 @@ func (bh *BobHandler) HandleSearch(w http.ResponseWriter, req *http.Request) {
 	}
 
 	searchResponse := bh.player.Search(&searchRequest)
-
-	err = utils.SendEvent(bh.eventBroker, "play", nil)
-	if responseHelper.ReturnHasError(err) {
-		return
-	}
 
 	responseHelper.ReturnOk(searchResponse)
 }

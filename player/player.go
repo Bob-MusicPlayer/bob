@@ -4,7 +4,7 @@ import (
 	"bob/core"
 	"bob/model"
 	"errors"
-	"fmt"
+	"github.com/alexandrevicenzi/go-sse"
 	"github.com/sirupsen/logrus"
 	"time"
 )
@@ -27,13 +27,15 @@ type Player struct {
 	loading         bool
 	env             *core.Environment
 	bobForwarder    *BobForwarder
+	eventBroker     *sse.Server
 }
 
-func NewPlayer(queue *Queue, env *core.Environment, bobForwarder *BobForwarder) *Player {
+func NewPlayer(queue *Queue, env *core.Environment, bobForwarder *BobForwarder, eventBroker *sse.Server) *Player {
 	player := &Player{
 		Queue:        queue,
 		env:          env,
 		bobForwarder: bobForwarder,
+		eventBroker:  eventBroker,
 	}
 
 	player.PlayerLoop()
@@ -56,11 +58,11 @@ func (p *Player) PlayerLoop() {
 			} else {
 				oldPosEqPosTimes = 0
 			}
-			if p.CurrentPlayback != nil && p.Queue.Size() == 0 && p.CurrentPlayback.Duration > 0 && oldPosEqPosTimes > 4 {
+			if p.IsPlaying && p.CurrentPlayback != nil && p.Queue.Size() == 0 && p.CurrentPlayback.Duration > 0 && oldPosEqPosTimes > 4 {
 				logrus.Info("Current Playback finished. Stop player.")
 				p.CurrentPlayback = nil
 				oldPosEqPosTimes = 0
-			} else if p.CurrentPlayback != nil && p.Queue.Size() > 0 && p.CurrentPlayback.Duration > 0 && oldPosEqPosTimes > 4 {
+			} else if p.IsPlaying && p.CurrentPlayback != nil && p.Queue.Size() > 0 && p.CurrentPlayback.Duration > 0 && oldPosEqPosTimes > 4 {
 				logrus.Info("Current Playback finished. Set next playback.")
 				p.Next()
 				oldPosEqPosTimes = 0
@@ -79,19 +81,20 @@ func (p *Player) GetState() string {
 	}
 	if p.IsPlaying {
 		return PLAYER_STATE_PLAYING
-	} else if p.Queue.Size() == 0 {
-		p.CurrentPlayback = nil
-		return PLAYER_STATE_NO_PLAYBACK
+	} else {
+		return PLAYER_STATE_PAUSED
 	}
-	return PLAYER_STATE_NO_PLAYBACK
 }
 
 func (p *Player) Search(search *model.SearchRequest) *model.SearchResponse {
+	logrus.WithField("search", search).Info("Search for Playbacks")
 	return p.bobForwarder.ForwardSearch(search.Query)
 }
 
 func (p *Player) SetPlayback(playback model.Playback) error {
 	p.loading = true
+
+	logrus.WithField("playback", playback).Info("Set playback")
 
 	err := p.bobForwarder.ForwardSetPlayback(playback)
 
@@ -106,6 +109,9 @@ func (p *Player) Play() error {
 	if p.CurrentPlayback == nil {
 		return nil
 	}
+
+	logrus.Info("Play")
+
 	err := p.bobForwarder.ForwardPlay(p.CurrentPlayback.Source)
 	return err
 }
@@ -114,11 +120,16 @@ func (p *Player) Pause() error {
 	if p.CurrentPlayback == nil {
 		return nil
 	}
+
+	logrus.Info("Pause")
+
 	err := p.bobForwarder.ForwardPause(p.CurrentPlayback.Source)
 	return err
 }
 
 func (p *Player) Next() error {
+	logrus.Info("Next Playback")
+
 	if p.Queue.Size() == 0 {
 		return NO_NEXT_PLAYBACK
 	}
@@ -136,6 +147,8 @@ func (p *Player) Next() error {
 }
 
 func (p *Player) Previous() error {
+	logrus.Info("Previous Playback")
+
 	if p.Queue.SizePrevious() == 0 {
 		return NO_NEXT_PLAYBACK
 	}
@@ -168,11 +181,11 @@ func (p *Player) Sync() error {
 }
 
 func (p *Player) SeekTo(source string, seconds int) error {
+	logrus.WithField("seconds", seconds).Info("Seek")
+
 	if p.CurrentPlayback == nil {
 		return nil
 	}
-
-	fmt.Println(seconds)
 
 	err := p.bobForwarder.ForwardSeek(source, seconds)
 	if err != nil {

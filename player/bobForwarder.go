@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -47,7 +48,7 @@ func (bf *BobForwarder) ForwardSearch(query string) *model.SearchResponse {
 
 	response := model.SearchResponse{}
 
-	fmt.Println(url.QueryEscape(query))
+	logrus.Debugf("QueryEscaped Search is %s", url.QueryEscape(query))
 
 	for _, player := range players {
 		resp, err := http.Get(bf.buildUrl(player, fmt.Sprintf("search?q=%s", url.QueryEscape(query))))
@@ -136,8 +137,6 @@ func (bf *BobForwarder) ForwardGetPlaybackInfo(source string) (*model.Playback, 
 
 func (bf *BobForwarder) ForwardSeek(source string, seconds int) error {
 	player := bf.env.ConfigManager.GetPlayerBySource(source)
-
-	fmt.Println(bf.buildUrl(player, fmt.Sprintf("playback/seek?seconds=%d", seconds)))
 
 	_, err := http.Post(bf.buildUrl(player, fmt.Sprintf("playback/seek?seconds=%d", seconds)), "application/json", nil)
 

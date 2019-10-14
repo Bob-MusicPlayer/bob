@@ -1,7 +1,10 @@
 package model
 
 type Config struct {
-	Player []*Player `json:"player"`
+	Hostname string    `json:"hostname"`
+	Port     int       `json:"port"`
+	LogLevel string    `json:"logLevel"`
+	Player   []*Player `json:"player"`
 }
 
 type Player struct {

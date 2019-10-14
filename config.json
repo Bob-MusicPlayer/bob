@@ -1,4 +1,7 @@
 {
+  "hostname": "localhost",
+  "port": 5002,
+  "logLevel": "info",
   "player": [
     {
       "source": "youtube",
