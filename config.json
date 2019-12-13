@@ -1,5 +1,5 @@
 {
-  "hostname": "localhost",
+  "hostname": "0.0.0.0",
   "port": 5002,
   "logLevel": "info",
   "player": [
@@ -13,6 +13,12 @@
       "source": "mpd",
       "hostname": "localhost",
       "port": 5000,
+      "iconUrl": "https://ionicons.com/ionicons/svg/md-cloud.svg"
+    },
+    {
+      "source": "spotify",
+      "hostname": "localhost",
+      "port": 5003,
       "iconUrl": "https://ionicons.com/ionicons/svg/md-cloud.svg"
     }
   ]

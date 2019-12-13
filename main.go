@@ -12,6 +12,10 @@ import (
 	"os"
 )
 
+const (
+	version = "0.0.1"
+)
+
 func main() {
 	environment := &core.Environment{}
 
@@ -86,6 +90,8 @@ func printBanner() {
 	fmt.Println("|   ██████\033[1;34m╔╝╚\033[0m██████\033[1;34m╔╝\033[0m██████\033[1;34m╔╝\033[0m   |")
 	fmt.Println("|   \033[1;34m╚═════╝  ╚═════╝ ╚═════╝\033[0m    |")
 	fmt.Println("|                               |")
+	fmt.Println("+-------------------------------+")
+	fmt.Printf("|  Version: %7s             |\n", version)
 	fmt.Println("+-------------------------------+")
 }
 

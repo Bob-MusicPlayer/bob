@@ -49,6 +49,10 @@ func (p *Player) PlayerLoop() {
 		oldPosEqPosTimes := 0
 
 		for {
+			logrus.WithFields(logrus.Fields{
+				"current":  p.CurrentPlayback,
+				"position": p.IsPlaying,
+			})
 			if p.CurrentPlayback != nil {
 				oldPosition = p.CurrentPlayback.Position
 			}
