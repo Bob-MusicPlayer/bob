@@ -1,11 +1,11 @@
 package player
 
 import (
-	"bob/core"
-	"bob/model"
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/Bob-MusicPlayer/bob/core"
+	"github.com/Bob-MusicPlayer/bob/model"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"

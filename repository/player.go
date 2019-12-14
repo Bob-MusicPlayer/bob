@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"bob/model"
+	"github.com/Bob-MusicPlayer/bob/model"
 )
 
 type PlayerRepository struct {

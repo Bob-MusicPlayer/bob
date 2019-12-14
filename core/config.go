@@ -1,8 +1,8 @@
 package core
 
 import (
-	"bob/model"
 	"encoding/json"
+	"github.com/Bob-MusicPlayer/bob/model"
 	"io/ioutil"
 )
 

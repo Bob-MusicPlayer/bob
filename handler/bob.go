@@ -1,13 +1,13 @@
 package handler
 
 import (
-	"bob/model"
-	"bob/player"
-	"bob/utils"
+	"github.com/Bob-MusicPlayer/bob/model"
+	"github.com/Bob-MusicPlayer/bob/player"
+	"github.com/Bob-MusicPlayer/bob/utils"
+	"github.com/Bob-MusicPlayer/shared-bob"
 	"github.com/alexandrevicenzi/go-sse"
 	"github.com/sirupsen/logrus"
 	"net/http"
-	shared "shared-bob"
 	"strconv"
 	"time"
 )

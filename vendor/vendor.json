@@ -9,22 +9,22 @@
 			"revisionTime": "2019-05-31T22:42:09Z"
 		},
 		{
-			"checksumSHA1": "Dm73A5CCfi9v/bNb0tTlju8wEys=",
-			"path": "github.com/go-pg/pg",
-			"revision": "71f9687e0ec6d8b9cafcd0c2b020ab4431117e24",
-			"revisionTime": "2019-09-17T10:00:26Z"
-		},
-		{
-			"checksumSHA1": "rw3J5/runUEevKnqOJuhdtDYGms=",
-			"path": "github.com/go-pg/pg/orm",
-			"revision": "71f9687e0ec6d8b9cafcd0c2b020ab4431117e24",
-			"revisionTime": "2019-09-17T10:00:26Z"
-		},
-		{
 			"checksumSHA1": "iqeSAF7imnVsW+iqLqf6kkYn1VU=",
 			"path": "github.com/jinzhu/inflection",
 			"revision": "f5c5f50e6090ae76a29240b61ae2a90dd810112e",
 			"revisionTime": "2019-06-03T04:28:36Z"
+		},
+		{
+			"checksumSHA1": "Z7rkupTQRAZzzTCqDLiSbNR70to=",
+			"path": "github.com/konsorten/go-windows-terminal-sequences",
+			"revision": "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e",
+			"revisionTime": "2019-02-26T22:47:05Z"
+		},
+		{
+			"checksumSHA1": "Trcam+FrFjjjzUs7aZXCALI/ZGY=",
+			"path": "github.com/sirupsen/logrus",
+			"revision": "67a7fdcf741f4d5cee82cb9800994ccfd4393ad0",
+			"revisionTime": "2019-10-26T11:39:18Z"
 		},
 		{
 			"checksumSHA1": "Hk0Joei7Y1gTiW08KkFbI694Oc8=",
@@ -51,15 +51,17 @@
 			"revisionTime": "2019-09-11T02:06:19Z"
 		},
 		{
+			"checksumSHA1": "Du5Dm7trh+tM907aW9eQXj2Jvgs=",
+			"path": "golang.org/x/sys/unix",
+			"revision": "ac6580df4449443a05718fd7858c1f91ad5f8d20",
+			"revisionTime": "2019-12-09T02:16:22Z"
+		},
+		{
 			"checksumSHA1": "3d7mxBDmd5LIAyMUYe5teXGXWTM=",
 			"path": "mellium.im/sasl",
 			"revision": "e27ea4901008898ec096743695a52411c2d03886",
 			"revisionTime": "2019-08-15T21:08:34Z"
-		},
-		{
-			"path": "shared-bob",
-			"revision": ""
 		}
 	],
-	"rootPath": "bob"
+	"rootPath": "github.com/Bob-MusicPlayer/bob"
 }

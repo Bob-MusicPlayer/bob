@@ -1,8 +1,8 @@
 package utils
 
 import (
-	"bob/model"
 	"encoding/json"
+	"github.com/Bob-MusicPlayer/bob/model"
 	"github.com/alexandrevicenzi/go-sse"
 )
 
